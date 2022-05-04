@@ -1,4 +1,4 @@
-package ru.verlonar.hw25;
+package ru.verlonar.hw25.data;
 
 public class Employee {
 
