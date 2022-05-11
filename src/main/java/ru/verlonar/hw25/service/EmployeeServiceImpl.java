@@ -1,76 +1,66 @@
 package ru.verlonar.hw25.service;
 
 import org.springframework.stereotype.Service;
-import ru.verlonar.hw25.Employee;
+import ru.verlonar.hw25.data.Employee;
 import ru.verlonar.hw25.exception.EmployeeIsAlreadyExistException;
 import ru.verlonar.hw25.exception.EmployeeNotFoundException;
-import ru.verlonar.hw25.exception.EmployeesArrayIsFullException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-    final Employee[] employees;
-
-    private int employeesNumber;
+    final List<Employee> employees;
 
     public EmployeeServiceImpl() {
-        this.employees = new Employee[10];
-        employeesNumber = 0;
+        this.employees = new ArrayList<>();
     }
-
 
     @Override
     public Employee addEmployee(String firstName, String lastName) {
-        if (employeesNumber >= employees.length) {
-            throw new EmployeesArrayIsFullException();
-        } else if (findEmployeeIndex(firstName, lastName) != -1) {
+        Employee newEmployee = contains(firstName, lastName);
+        if (newEmployee != null) {
             throw new EmployeeIsAlreadyExistException();
         } else {
-            int emptyIndex = findEmptyIndex();
-            employees[emptyIndex] = new Employee(firstName, lastName);
-            employeesNumber++;
-            return employees[emptyIndex];
+            newEmployee = new Employee(firstName, lastName);
+            employees.add(newEmployee);
+            return newEmployee;
         }
     }
 
     @Override
     public Employee deleteEmployee(String firstName, String lastName) {
-        int indexToDelete = findEmployeeIndex(firstName, lastName);
-        if (indexToDelete == -1) {
+        Employee employeeToDelete = contains(firstName, lastName);
+        if (employeeToDelete == null) {
             throw new EmployeeNotFoundException();
         } else {
-            Employee employeeToDelete = employees[indexToDelete];
-            employees[indexToDelete] = null;
-            employeesNumber--;
+            employees.remove(employeeToDelete);
             return employeeToDelete;
         }
     }
 
     @Override
     public Employee findEmployee(String firstName, String lastName) {
-        int employeeIndex = findEmployeeIndex(firstName, lastName);
-        if (employeeIndex == -1) {
+        Employee employeeSoughtFor = contains(firstName, lastName);
+        if (employeeSoughtFor == null) {
             throw new EmployeeNotFoundException();
         } else {
-            return employees[employeeIndex];
+            return employeeSoughtFor;
         }
     }
 
-    private int findEmployeeIndex(String firstName, String lastName) {
-        for (int i = 0; i < employees.length; i++) {
-            if (employees[i] != null && (employees[i].toString().equals(firstName + " " + lastName) )) {
-                return i;
-            }
-        }
-        return -1;
+    @Override
+    public List<Employee> showAll() {
+        return employees;
     }
 
-    private int findEmptyIndex() {
-        for (int i = 0; i < employees.length; i++) {
-            if (employees[i] == null) {
-                return i;
+    private Employee contains(String firstName, String lastName) {
+        for (Employee employee : employees) {
+            if (employee.getFirstName().equals(firstName) && employee.getLastName().contains(lastName)) {
+                return employee;
             }
         }
-        return -1;
+        return null;
     }
 }
